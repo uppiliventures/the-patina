@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>the patina clock</title>
+<!--
+  THE PATINA CLOCK
+  A single self-hostable file. No build step. No dependencies except
+  a public RPC. Save this page to your desktop and it keeps working.
+
+  It does one thing: asks the contract to render a token, then shows it.
+  The image is not fetched from anywhere. It is computed by the chain.
+-->
+<style>
+  body { background:#111; color:#ccc; font-family:Georgia,serif;
+         display:flex; flex-direction:column; align-items:center;
+         gap:1rem; padding:2rem; }
+  input,button { font:inherit; padding:.4rem .8rem; background:#1a1a1a;
+         color:#ccc; border:1px solid #444; }
+  #plate { width:min(90vw,512px); height:min(90vw,512px);
+         border:1px solid #333; }
+  #meta { font-size:.85rem; color:#777; max-width:512px; text-align:center; }
+</style>
+</head>
+<body>
+  <div>
+    <input id="tokenId" type="number" min="0" max="998" value="0">
+    <button id="load">read the chain</button>
+  </div>
+  <div id="plate"></div>
+  <p id="meta">enter a token id. the contract renders it live.</p>
+
+<script>
+// ---- fill these in at deploy time ----
+const CONTRACT = "0x0000000000000000000000000000000000000000"; // Patina on Zora
+const RPC      = "https://rpc.zora.energy";
+
+// tokenURI(uint256) selector
+const SELECTOR = "0xc87b56dd";
+
+async function readToken(id) {
+  const data = SELECTOR + BigInt(id).toString(16).padStart(64, "0");
+  const res = await fetch(RPC, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc:"2.0", id:1, method:"eth_call",
+      params:[{ to: CONTRACT, data }, "latest"] })
+  });
+  const { result, error } = await res.json();
+  if (error) throw new Error(error.message);
+  return result;
+}
+
+// TODO before testnet:
+//  - abi-decode the returned string
+//  - unwrap data:application/json;base64 then image field
+//  - inject SVG into #plate
+//  - show seconds since last polish in #meta, plain prose, no adjectives
+
+document.getElementById("load").onclick = async () => {
+  const id = document.getElementById("tokenId").value;
+  document.getElementById("meta").textContent = "asking the chain about #" + id + "...";
+  try {
+    await readToken(id);
+    document.getElementById("meta").textContent =
+      "decode step not implemented yet. the contract answered, though.";
+  } catch (e) {
+    document.getElementById("meta").textContent = "the chain said: " + e.message;
+  }
+};
+</script>
+</body>
+</html>
