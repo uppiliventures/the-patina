@@ -10,7 +10,9 @@ Read the [whitepaper](WHITEPAPER.md).
 
 ## Testnet
 
-Not yet deployed. This line becomes an address when it is.
+Live on Zora Sepolia: [`0x3B4c5b49D43521F7f794436A0a49D9e876eD8b5a`](https://sepolia.explorer.zora.energy/address/0x3B4c5b49D43521F7f794436A0a49D9e876eD8b5a)
+
+The two-week public review clock started 5 July 2026.
 
 ## Break it
 
