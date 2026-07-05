@@ -127,9 +127,17 @@ library OxidationMath {
             // if MAX_DEPTH ever exceeds uint32, refuse to truncate
             // silently. (Adversarial review: finding accepted.)
             assert(settled <= type(uint32).max);
+            // casting to 'uint32' is safe because settled is capped at
+            // MAX_DEPTH (3650) above, and the assert refuses truncation
+            // if that invariant is ever broken by a future edit.
+            // forge-lint: disable-next-line(unsafe-typecast)
             s.settledDepth = uint32(settled);
         }
 
+        // casting to 'uint64' is safe because nowTs is block.timestamp,
+        // which fits in uint64 until the year 2554. The Patina's Y2.5K
+        // problem is hereby bequeathed to the archaeologists.
+        // forge-lint: disable-next-line(unsafe-typecast)
         s.lastPolished = uint64(nowTs);
         s.polishCount += 1;
     }
@@ -138,6 +146,9 @@ library OxidationMath {
     /// A surface is born gleaming and protected. Its first 30 days are
     /// a grace window: mint counts as the zeroth polish.
     function initialize(Surface storage s, uint256 nowTs) internal {
+        // casting to 'uint64' is safe because nowTs is block.timestamp;
+        // see the identical cast in applyPolish for the reasoning.
+        // forge-lint: disable-next-line(unsafe-typecast)
         s.lastPolished = uint64(nowTs);
         s.settledDepth = 0;
         s.polishCount = 0;
